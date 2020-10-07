@@ -36,9 +36,9 @@ projectile.vim require fzf.vim to work correctly.
 
 ### Using vim-plug
 
-\#+being<sub>src</sub> vimscript
-Plug &rsquo;tknightz/projectile.vim&rsquo;
-\#+end<sub>src</sub>
+```vimscript
+Plug 'tknightz/projectile.vim'
+```
 
 
 <a id="org36a0ab2"></a>
