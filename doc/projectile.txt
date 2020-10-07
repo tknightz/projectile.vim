@@ -1,0 +1,8 @@
+Projectile is a plugin aspiring by Projectile Emacs. It help Vim can store a project, jump right into it, switch easily between multi project.
+
+BASIC USAGE:
+Type: 
+  - :AddProject to add new project.
+  - :RemoveProject to remove project.
+  - :ListProject to list all projects.
+
