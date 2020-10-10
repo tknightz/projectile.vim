@@ -71,7 +71,7 @@ function! g:Add_Project()
   endif
   call inputrestore()
 
-  let g:directory = '/home/tknightz/'
+  let g:directory = '$HOME'
   
   let g:fzf_action = {
         \'tab': function('s:Select_Dir'),
