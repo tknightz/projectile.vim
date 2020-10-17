@@ -85,10 +85,11 @@ endfunction
 
 function! Current_File_Proj()
   let s:current_file_path = expand('%:p:h')
-  if strlen(s:current_file_path) > 2
-    exec ":Files " . system('git -C '. s:current_file_path . ' rev-parse --show-toplevel 2> /dev/null')[:-2]
+  let s:current_project = system('git -C '. s:current_file_path . ' rev-parse --show-toplevel 2> /dev/null')[:-2]
+  if len(s:current_project) > 0
+    exec ":Files " . s:current_project
   else
-    exec ":Files ."
+    exec ":Files " . s:current_file_path
   endif
 endfunction
 
