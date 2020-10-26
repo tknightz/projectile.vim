@@ -6,6 +6,7 @@ let g:projectile_loaded = 1
 
 function! Change_Dir(...)
   let paths = split(a:1)
+  let g:working_dir = paths[4]
   echo paths
   exec "cd " . paths[4]
   if exists("g:NERDTree")
@@ -46,7 +47,7 @@ function! s:Previous_Dir(...)
   echo g:directory
   call fzf#run(fzf#wrap({ 
         \'source': 'find ' . g:directory . ' -maxdepth 1 -type d | sed "s:^"'.g:directory.'::', 
-        \'options': '--tiebreak=begin --prompt='.g:directory}))
+        \'options': '--tiebreak=begin --header-lines=1 --prompt='.g:directory}))
 endfunction
 
 function! s:Select_Dir(...)
@@ -54,7 +55,7 @@ function! s:Select_Dir(...)
   let g:directory .= a:1[0] . '/'
   call fzf#run(fzf#wrap({ 
         \'source': 'find ' . g:directory . ' -maxdepth 1 -type d | sed "s:^"'.g:directory.'::', 
-        \'options': '--tiebreak=begin --prompt='.g:directory}))
+        \'options': '+m --ansi --tiebreak=begin --prompt='.g:directory}))
 endfunction
 
 function! g:Add_Project()
@@ -71,7 +72,7 @@ function! g:Add_Project()
   endif
   call inputrestore()
 
-  let g:directory = '$HOME'
+  let g:directory = $HOME.'/'
   
   let g:fzf_action = {
         \'tab': function('s:Select_Dir'),
@@ -80,16 +81,28 @@ function! g:Add_Project()
         \}
   let project_path = fzf#run(fzf#wrap({ 
         \'source': 'find ~ -maxdepth 1 -type d | sed "s:^'.g:directory.'::"', 
-        \'options': '--ansi --tiebreak=begin --header-lines=1 --prompt='.g:directory}))
+        \'options': '+m --ansi --tiebreak=begin --header-lines=1 --prompt='.g:directory}))
+endfunction
+
+function! Show_Files(...)
+  let s:path = a:1
+  call fzf#run(fzf#wrap({
+  \'source': 'rg --files --follow --hidden -g "!{node_modules/*,.git/*}" '.s:path. ' | sed "s:^"'.s:path.'/::',  
+  \'sink': 'e ',
+  \'options': "--preview 'bat --style=numbers --color=always $(cut -d: -f1 <<< {}) 2> /dev/null | head -".&lines."' --tiebreak=begin --prompt='  File >> '"}))
 endfunction
 
 function! Current_File_Proj()
   let s:current_file_path = expand('%:p:h')
   let s:current_project = system('git -C '. s:current_file_path . ' rev-parse --show-toplevel 2> /dev/null')[:-2]
   if len(s:current_project) > 0
-    exec ":Files " . s:current_project
+    if s:current_file_path == s:current_project || s:current_project == g:working_dir
+      call Show_Files('.')
+    else
+      call Show_Files(s:current_project)
+    endif
   else
-    exec ":Files " . s:current_file_path
+    call Show_Files(s:current_file_path)
   endif
 endfunction
 
