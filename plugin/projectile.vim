@@ -84,24 +84,33 @@ function! g:Add_Project()
         \'options': '+m --ansi --tiebreak=begin --header-lines=1 --prompt='.g:directory}))
 endfunction
 
+function! Edit_File(...)
+  let file_name = a:1
+  let s:current_file_path = expand('%:p:h')
+  let s:current_project = system('git -C '. s:current_file_path . ' rev-parse --show-toplevel 2> /dev/null')[:-2]
+  if len(s:current_file_path)
+    exec ':e '.s:current_project.'/'.file_name
+  else
+    exec ':e '.s:current_file_path.'/'.file_name
+  endif
+endfunction
+
 function! Show_Files(...)
   let s:path = a:1
   call fzf#run(fzf#wrap({
-  \'source': 'rg --files --follow --hidden -g "!{node_modules/*,.git/*}" '.s:path. ' | sed "s:^"'.s:path.'/::',  
-  \'sink': 'e ',
+  \'source': 'rg --files --hidden -g "!{.git,node_modules}" '.s:path. ' | sed "s:^"'.s:path.'/::',  
+  \'sink': function('Edit_File'),
   \'options': "--preview 'bat --style=numbers --color=always $(cut -d: -f1 <<< {}) 2> /dev/null | head -".&lines."' --tiebreak=begin --prompt='  File >> '"}))
 endfunction
 
-function! Current_File_Proj()
+function! g:Current_File_Proj()
   let s:current_file_path = expand('%:p:h')
   let s:current_project = system('git -C '. s:current_file_path . ' rev-parse --show-toplevel 2> /dev/null')[:-2]
   if len(s:current_project) > 0
-    if s:current_file_path == s:current_project || s:current_project == g:working_dir
-      call Show_Files('.')
-    else
-      call Show_Files(s:current_project)
-    endif
+    echo 'Running here 1'
+    call Show_Files(s:current_project)
   else
+    echo 'Running here 2'
     call Show_Files(s:current_file_path)
   endif
 endfunction
