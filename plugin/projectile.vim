@@ -88,7 +88,7 @@ function! Edit_File(...)
   let file_name = a:1
   let s:current_file_path = expand('%:p:h')
   let s:current_project = system('git -C '. s:current_file_path . ' rev-parse --show-toplevel 2> /dev/null')[:-2]
-  if len(s:current_file_path)
+  if len(s:current_project)
     exec ':e '.s:current_project.'/'.file_name
   else
     exec ':e '.s:current_file_path.'/'.file_name
