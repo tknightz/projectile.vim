@@ -28,7 +28,7 @@ endfunction
 
 
 function! s:Save_Project(...)
-  let project_path = g:directory
+  let project_path = g:directory . a:1[0]
   let project_git_root = system('git -C ' . project_path . ' rev-parse --show-toplevel 2> /dev/null')[:-2]
   if strlen(project_git_root) > 2
     call writefile([g:project_name . "\t\t" . project_git_root], $HOME . '/.config/nvim/.projects', 'a')
@@ -100,7 +100,8 @@ function! Show_Files(...)
   call fzf#run(fzf#wrap({
   \'source': 'rg --files --hidden -g "!{.git,node_modules}" '.s:path. ' | sed "s:^"'.s:path.'/::',  
   \'sink': function('Edit_File'),
-  \'options': "--preview 'bat --style=numbers --color=always $(cut -d: -f1 <<< {}) 2> /dev/null | head -".&lines."' --tiebreak=begin --prompt='  File >> '"}))
+  \'options': "--preview 'bat --style=numbers --color=always ".s:path."/$(<<< {}) ' --tiebreak=begin --prompt='  File >> '"}))
+
 endfunction
 
 function! g:Current_File_Proj()
