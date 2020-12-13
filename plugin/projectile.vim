@@ -7,7 +7,6 @@ let g:projectile_loaded = 1
 function! Change_Dir(...)
   let paths = split(a:1)
   let g:working_dir = paths[4]
-  echo paths
   exec "cd " . paths[4]
   if exists("g:NERDTree")
     silent exec ":NERDTreeCWD"
@@ -100,7 +99,7 @@ function! Show_Files(...)
   call fzf#run(fzf#wrap({
   \'source': 'rg --files --hidden -g "!{.git,node_modules}" '.s:path. ' | sed "s:^"'.s:path.'/::',  
   \'sink': function('Edit_File'),
-  \'options': "--preview 'bat --style=numbers --color=always ".s:path."/$(<<< {}) ' --tiebreak=begin --prompt='  File >> '"}))
+  \'options': "--preview 'bat --style=numbers --color=always ".s:path."/$(<<< {}) ' --delimiter=/ --nth=-1 --tiebreak=begin --prompt='  File >> '"}))
 
 endfunction
 
@@ -108,10 +107,8 @@ function! g:Current_File_Proj()
   let s:current_file_path = expand('%:p:h')
   let s:current_project = system('git -C '. s:current_file_path . ' rev-parse --show-toplevel 2> /dev/null')[:-2]
   if len(s:current_project) > 0
-    echo 'Running here 1'
     call Show_Files(s:current_project)
   else
-    echo 'Running here 2'
     call Show_Files(s:current_file_path)
   endif
 endfunction
