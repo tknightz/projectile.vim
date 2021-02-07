@@ -6,7 +6,8 @@ let g:projectile_loaded = 1
 
 function! Change_Dir(...)
   let paths = split(a:1)
-  let g:working_dir = paths[4]
+  let g:workplace_name = paths[2]
+  let g:workplace_path = paths[4]
   exec "cd " . paths[4]
   if exists("g:NERDTree")
     silent exec ":NERDTreeCWD"
@@ -85,6 +86,12 @@ endfunction
 
 function! Edit_File(...)
   let file_name = a:1
+
+  if g:show_files_project 
+    exec ':e '.file_name
+    return
+  endif
+
   let s:current_file_path = expand('%:p:h')
   let s:current_project = system('git -C '. s:current_file_path . ' rev-parse --show-toplevel 2> /dev/null')[:-2]
   if len(s:current_project)
@@ -96,14 +103,22 @@ endfunction
 
 function! Show_Files(...)
   let s:path = a:1
+  let s:prompt_name = 'Files'
+  if exists('g:workplace_path')
+    if s:path == g:workplace_path
+      let s:prompt_name = g:workplace_name
+    endif
+  endif
+    
   call fzf#run(fzf#wrap({
   \'source': 'rg --files --hidden -g "!{.git,node_modules}" '.s:path. ' | sed "s:^"'.s:path.'/::',  
   \'sink': function('Edit_File'),
-  \'options': "--preview 'bat --style=numbers --color=always ".s:path."/$(<<< {}) ' --delimiter=/ --nth=-1 --tiebreak=begin --prompt='  File >> '"}))
+  \'options': "--preview 'bat --style=numbers --color=always ".s:path."/$(<<< {}) ' --delimiter=/ --nth=-1,1,2,3 --tiebreak=begin --prompt='  ".s:prompt_name." >> '"}))
 
 endfunction
 
 function! g:Current_File_Proj()
+  let g:show_files_project = 0
   let s:current_file_path = expand('%:p:h')
   let s:current_project = system('git -C '. s:current_file_path . ' rev-parse --show-toplevel 2> /dev/null')[:-2]
   if len(s:current_project) > 0
@@ -112,6 +127,16 @@ function! g:Current_File_Proj()
     call Show_Files(s:current_file_path)
   endif
 endfunction
+
+function! g:Find_In_Project()
+  if exists('g:workplace_path') == 1
+    let g:show_files_project = 1
+    call Show_Files(g:workplace_path)
+  else
+    echo "You're not in project!"
+  endif
+endfunction
+
 
 function! s:Delete_Project(...)
   if !filereadable($HOME . '/.config/nvim/.projects')
