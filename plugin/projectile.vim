@@ -36,7 +36,7 @@ function! s:Save_Project(...)
     call writefile([g:project_name . "\t\t" . project_path], $HOME . '/.config/nvim/.projects', 'a')
   endif
   redraw!
-  echohl WarningMsg
+  echohl Question
   echo "Created project ".g:project_name
   echohl None
 endfunction
@@ -60,7 +60,7 @@ endfunction
 
 function! g:Add_Project()
   call inputsave()
-  echohl WarningMsg
+  echohl Question
   let g:project_name = substitute(input("  Project's name: "), " ", "", "g")
   echohl None
   if strlen(trim(g:project_name)) < 2
@@ -146,24 +146,43 @@ function! s:Delete_Project(...)
   let line = split(a:1)
   let path = str2nr(line[0]) 
 
-  echohl Question
-  echo "Are you sure to delete " . split(projects[path])[0] . "? (Y)es/(n)o?"
+  call inputsave()
+  echohl WarningMsg
+  let choice = substitute(input(" Are you sure to delete " . split(projects[path])[0] . "? yes/no? "), " ", "", "g")
   echohl None
-
-  let choice = nr2char(getchar())
-  if choice == 'y'
+  if trim(choice) == 'yes'
     redraw!
     echohl WarningMsg
     echo "Removed " . split(projects[path])[0]
     echohl None
     call remove(projects, path, path)
     call writefile(projects, $HOME . '/.config/nvim/.projects')
-  elseif choice == 'n'
+  elseif choice == 'no'
     echohl WarningMsg
     echo "Cancelled!"
     echohl None
     return
   endif
+  call inputrestore()
+
+  " echohl WarningMsg
+  " echo 
+  " echohl None
+
+  " let choice = nr2char(getchar())
+  " if choice == 'y'
+  "   redraw!
+  "   echohl WarningMsg
+  "   echo "Removed " . split(projects[path])[0]
+  "   echohl None
+  "   call remove(projects, path, path)
+  "   call writefile(projects, $HOME . '/.config/nvim/.projects')
+  " elseif choice == 'n'
+  "   echohl WarningMsg
+  "   echo "Cancelled!"
+  "   echohl None
+  "   return
+  " endif
 endfunction
 
 function! g:Remove_Project()
